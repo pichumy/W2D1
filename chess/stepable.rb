@@ -6,7 +6,8 @@ module Stepable
     move_diffs.each do |position| 
       x, y = @pos
       d_x, d_y = position 
-      new_pos = [x + d_x, y + d_y] 
+      new_pos = [x + d_x, y + d_y]
+      next unless @board.valid_pos?(new_pos)
       results.push(new_pos) if @board[new_pos] == NullPiece.instance || @board[new_pos].color != @color
     end   
     results 

@@ -30,7 +30,7 @@ module SlidingPiece
       until invalid 
         x, y = x + d_x, y + d_y 
         new_pos = [x, y]
-        unless new_pos.all? {|point| point.between?(0,7)}
+        unless @board.valid_pos?(new_pos)
           invalid = true 
           next 
         end 

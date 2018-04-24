@@ -2,9 +2,13 @@ require_relative 'pieces.rb'
 
 class Board
   attr_reader :grid
-  def initialize
-    @grid = nil 
-    setup
+  def initialize(grid = nil)
+    if grid.nil? 
+      @grid = nil 
+      setup
+    else 
+      @grid = grid 
+    end 
   end
   
   def setup
@@ -28,7 +32,7 @@ class Board
     null_board[0][6] = Knight.new(:white, self, [0,6])
     null_board[7][1] = Knight.new(:black, self, [7,1])
     null_board[7][6] = Knight.new(:black, self, [7,6])
-    null_board[0][3] = King.new(:white, self, [0,3])
+    null_board[0][4] = King.new(:white, self, [0,4])
     null_board[7][4] = King.new(:black, self, [7,4])
     null_board[0][0] = Rook.new(:white, self, [0,0])
     null_board[0][7] = Rook.new(:white, self, [0,7])
@@ -38,7 +42,7 @@ class Board
     null_board[0][5] = Bishop.new(:white, self, [0,5])
     null_board[7][2] = Bishop.new(:black, self, [7,2])
     null_board[7][5] = Bishop.new(:black, self, [7,5])
-    null_board[0][4] = Queen.new(:white, self, [0,4])
+    null_board[0][3] = Queen.new(:white, self, [0,3])
     null_board[7][3] = Queen.new(:black, self, [7,3])
     
     null_board
@@ -49,7 +53,7 @@ class Board
     
     piece = self[start_pos]
     
-    moves = piece.valid_moves
+    moves = piece.moves
     raise "Invalid move." unless moves.include?(end_pos)
     
     if self[end_pos] == NullPiece.instance 
@@ -85,7 +89,7 @@ class Board
       king = find_king(color)
       enemies = find_opposing_pieces(color)
       enemies.each do |enemy|
-        return true if enemy.valid_moves.include?(king.pos)
+        return true if enemy.moves.include?(king.pos)
       end
       false
   end
@@ -108,8 +112,30 @@ class Board
     end
     result
   end 
-  def checkmate?(color) 
   
+  def checkmate?(color)
+    enemy_color = :black if color == :white 
+    enemy_color = :white if color == :black  
+    if in_check?(color)
+      my_pieces = find_opposing_pieces(enemy_color)
+      my_pieces.each do |piece| 
+        return false if piece.valid_moves.length > 0 
+      end
+      return true  
+    end 
+    false 
+  end 
+  
+  def deep_dup
+    results = []
+    @grid.each do |row| 
+      rows = []
+      row.each do |piece| 
+        rows.push(piece.deep_dup)
+      end 
+      results.push(rows)
+    end 
+    Board.new(results) 
   end 
   
   def inspect 

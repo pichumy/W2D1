@@ -1,6 +1,7 @@
 require 'singleton'
 require_relative 'stepable'
 require_relative 'sliding'
+require 'byebug'
 
 
 class Piece
@@ -13,7 +14,19 @@ class Piece
   end
   
   def valid_moves
-    moves
+    results = []
+    all_moves = moves
+    all_moves.each do |move| 
+      duped_board = @board.deep_dup
+      duped_board.grid.each do |row| 
+        row.each do |piece| 
+          piece.get_board(duped_board)
+        end 
+      end
+      duped_board.move_piece(@pos, move)
+      results << move unless duped_board.in_check?(@color)
+    end
+    results 
   end
   
   def to_s
@@ -22,6 +35,14 @@ class Piece
   
   def inspect
     {'Type' => self.class, 'color' => @color, 'pos' => @pos}.inspect  
+  end
+  
+  def deep_dup
+    deep_pos = @pos.dup  
+  end
+    
+  def get_board(board)
+    @board = board 
   end 
 end
 
@@ -33,7 +54,11 @@ class NullPiece < Piece
   
   def to_s 
     return " "
-  end 
+  end
+  
+  def deep_dup
+    self 
+  end  
 end
 
 class Bishop < Piece
@@ -55,6 +80,12 @@ class Bishop < Piece
       "\u265D".encode('utf-8')
     end 
   end 
+  
+  def deep_dup
+    deep_pos = super
+    Bishop.new(@color, nil, deep_pos)  
+  end
+  
 end 
 
 class Queen < Piece 
@@ -76,6 +107,12 @@ class Queen < Piece
       "\u265B".encode('utf-8')
     end 
   end 
+  
+  def deep_dup
+    deep_pos = super
+    Queen.new(@color, nil, deep_pos)  
+  end
+  
 end 
 
 class Rook < Piece 
@@ -96,7 +133,13 @@ class Rook < Piece
     else 
       "\u265C".encode('utf-8')
     end 
-  end 
+  end
+   
+  def deep_dup
+    deep_pos = super
+    Rook.new(@color, nil, deep_pos)  
+  end
+  
 end 
 
 class King < Piece 
@@ -127,6 +170,11 @@ class King < Piece
      end 
   end 
 
+  def deep_dup
+    deep_pos = super
+    King.new(@color, nil, deep_pos)  
+  end
+  
 end 
 
 class Knight < Piece 
@@ -156,6 +204,12 @@ class Knight < Piece
       "\u265E".encode('utf-8')
     end 
   end 
+  
+  def deep_dup
+    deep_pos = super
+    Knight.new(@color, nil, deep_pos)  
+  end
+  
 end 
 
 class Pawn < Piece 
@@ -165,7 +219,7 @@ class Pawn < Piece
     super(color, board, position)
   end 
   
-  def valid_moves
+  def moves
     results = []
     directions = move_dirs
      
@@ -173,6 +227,7 @@ class Pawn < Piece
       x, y = @pos
       d_x, d_y = move 
       new_pos = [x + d_x, y + d_y]
+      next unless @board.valid_pos?(new_pos)
       if move.all? { |m| m.abs == 1 }
         if @board[new_pos] != NullPiece.instance && @board[new_pos].color != @color 
           results.push(new_pos)
@@ -219,6 +274,12 @@ class Pawn < Piece
       "\u265F".encode('utf-8')
     end  
   end 
+  
+  def deep_dup
+    deep_pos = super
+    Pawn.new(@color, nil, deep_pos)  
+  end
+  
 end 
 
 

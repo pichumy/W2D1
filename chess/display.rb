@@ -51,14 +51,18 @@ if __FILE__ == $0
   display = Display.new(b)
   display.render 
   sleep(1)
-  b.move_piece([6,3], [4,3])
+  b.move_piece([6,4], [4,4])
   display.render
   sleep(1)
-  b.move_piece([1,4], [3,4])
+  # byebug
+  b.move_piece([7,3], [3,7])
   display.render 
   sleep(1)
-  b.move_piece([3,4], [4,3])
+  b.move_piece([7,5], [4,2])
   display.render
-  something = b.in_check?(:white) 
+  # sleep(1)
+  # b.move_piece([3,7],[1,5])
+  # display.render 
+  something = b.checkmate?(:white) 
   puts something 
 end  

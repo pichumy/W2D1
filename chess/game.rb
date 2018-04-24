@@ -11,38 +11,6 @@ class Game
     @cursor = @display.cursor
   end
 
-  #   display = Display.new(@board)
-  # def play
-  #   until @board.checkmate?(@player1.color) || @board.checkmate?(@player2.color)
-  #     begin
-  #     display.render
-  #     start_pos = nil
-  #     until start_pos
-  #       start_pos = @current_turn.make_move(display.cursor)
-  #       display.render
-  #     end
-  #     piece = @board[start_pos]
-  #     raise "Error, you can't move that piece" if piece.color != @current_turn.color
-  #     display.valid_moves = piece.valid_moves
-  #     display.render
-  #     end_pos = nil
-  #     until end_pos
-  #       end_pos = @current_turn.make_move(display.cursor)
-  #       display.render
-  #     end
-  #     display.valid_moves = []
-  #     @board.move_piece(start_pos, end_pos)
-  #     switch_players
-  #   rescue RuntimeError => e
-  #     p e.message
-  #     sleep(1.5)
-  #     retry
-  #   end
-  #   end
-  #   switch_players
-  #   puts "Congratulations #{@current_turn.name}, you win!"
-  # end
-
   def play
     play_turn until won?
     switch_players #to know who the winner should be
@@ -95,7 +63,6 @@ class Game
   end
 
 end
-
 
 
 

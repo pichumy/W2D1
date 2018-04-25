@@ -186,14 +186,22 @@ class Pawn < Piece
       next unless @board.valid_pos?(new_pos)
       if move.all? { |m| m.abs == 1 } #diagnols
         results.push(new_pos) if !is_null?(new_pos) && @board[new_pos].color != @color
+
       elsif move.include?(-2) || move.include?(2) #first move of 2 for black
         results.push(new_pos) if move_2?(new_pos)
+
       elsif is_null?(new_pos) #standard move
         results.push(new_pos)
       end
+      # results += diagnols(new_pos)
     end
     results
   end
+
+  # def diagnols(new_pos)
+  #   moves = move_dirs.select {|move| move.all? {|m| m.abs == 1}}
+  #   moves.select {|move| !is_null?(new_pos) && @board[new_pos].color != @color}
+  # end
 
   def move_2?(new_pos)
     x, y = new_pos

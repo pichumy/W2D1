@@ -3,6 +3,24 @@ require_relative 'stepable'
 require_relative 'sliding'
 require 'byebug'
 
+UNICODES = {
+  white: {
+    king: "\u2654".encode('utf-8'),
+    queen: "\u2655".encode('utf-8'),
+    rook: "\u2656".encode('utf-8'),
+    knight: "\u2658".encode('utf-8'),
+    bishop: "\u2657".encode('utf-8'),
+    pawn: "\u2659".encode('utf-8'),
+  },
+  black: {
+    king: "\u265A".encode('utf-8'),
+    queen: "\u265B".encode('utf-8'),
+    rook: "\u265C".encode('utf-8'),
+    knight: "\u265E".encode('utf-8'),
+    bishop: "\u265D".encode('utf-8'),
+    pawn: "\u265F".encode('utf-8'),
+  }
+}
 
 class Piece
   attr_reader :color
@@ -33,7 +51,7 @@ class Piece
   end
 
   def to_s
-    return "P"
+    UNICODES[@color][@symbol]
   end
 
   def inspect
@@ -68,20 +86,12 @@ class Bishop < Piece
   include SlidingPiece
 
   def initialize(color, board, position)
-    @symbol = :b
+    @symbol = :bishop
     super(color, board, position)
   end
 
   def move_dirs
     [:diagonal]
-  end
-
-  def to_s
-    if @color == :white
-      "\u2657".encode('utf-8')
-    else
-      "\u265D".encode('utf-8')
-    end
   end
 
   def deep_dup
@@ -95,20 +105,12 @@ class Queen < Piece
   include SlidingPiece
 
   def initialize(color, board, position)
-    @symbol = :q
+    @symbol = :queen
     super(color, board, position)
   end
 
   def move_dirs
     [:diagonal, :horizontal]
-  end
-
-  def to_s
-    if @color == :white
-      "\u2655".encode('utf-8')
-    else
-      "\u265B".encode('utf-8')
-    end
   end
 
   def deep_dup
@@ -122,20 +124,12 @@ class Rook < Piece
   include SlidingPiece
 
   def initialize(color, board, position)
-    @symbol = :r
+    @symbol = :rook
     super(color, board, position)
   end
 
   def move_dirs
     [:horizontal]
-  end
-
-  def to_s
-    if @color == :white
-      "\u2656".encode('utf-8')
-    else
-      "\u265C".encode('utf-8')
-    end
   end
 
   def deep_dup
@@ -148,7 +142,7 @@ end
 class King < Piece
   include Stepable
   def initialize(color, board, position)
-    @symbol = :k
+    @symbol = :king
     super(color, board, position)
   end
 
@@ -165,14 +159,6 @@ class King < Piece
     ]
   end
 
-  def to_s
-     if @color == :white
-       "\u2654".encode('utf-8')
-     else
-       "\u265A".encode('utf-8')
-     end
-  end
-
   def deep_dup
     deep_pos = super
     King.new(@color, nil, deep_pos)
@@ -183,29 +169,12 @@ end
 class Knight < Piece
   include Stepable
   def initialize(color, board, position)
-    @symbol = :n
+    @symbol = :knight
     super(color, board, position)
   end
 
   def move_diffs
-    [
-      [1,2],
-      [2,1],
-      [2,-1],
-      [1,-2],
-      [-1,2],
-      [-2,1],
-      [-2,-1],
-      [-1,-2]
-    ]
-  end
-
-  def to_s
-    if @color == :white
-      "\u2658".encode('utf-8')
-    else
-      "\u265E".encode('utf-8')
-    end
+    [[1, 2], [2, 1], [2, -1], [1, -2], [-1 ,2], [-2 ,1], [-2, -1], [-1, -2]]
   end
 
   def deep_dup
@@ -217,7 +186,7 @@ end
 
 class Pawn < Piece
   def initialize(color, board, position)
-    @symbol = :p
+    @symbol = :pawn
     @start_position = position
     super(color, board, position)
   end
@@ -231,6 +200,8 @@ class Pawn < Piece
       d_x, d_y = move
       new_pos = [x + d_x, y + d_y]
       next unless @board.valid_pos?(new_pos)
+
+
       if move.all? { |m| m.abs == 1 }
         if @board[new_pos] != NullPiece.instance && @board[new_pos].color != @color
           results.push(new_pos)
@@ -250,32 +221,12 @@ class Pawn < Piece
       end
     end
     results
+
   end
 
   def move_dirs
-    if @color == :white
-      [
-        [1, 0],
-        [2, 0],
-        [1,-1],
-        [1,1]
-      ]
-    else
-      [
-        [-1, 0],
-        [-2, 0],
-        [-1, 1],
-        [-1, -1]
-      ]
-    end
-  end
-
-  def to_s
-    if @color == :white
-      "\u2659".encode('utf-8')
-    else
-      "\u265F".encode('utf-8')
-    end
+    dirs = [[1, 0], [2, 0], [1, -1], [1, 1]]
+    @color == :white ? dirs : (dirs.map { |set| [set[0] * -1, set[1] * -1] })
   end
 
   def deep_dup

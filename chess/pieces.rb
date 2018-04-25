@@ -31,17 +31,6 @@ class Piece
     @pos = pos
   end
 
-  # def valid_moves
-  #   results = []
-  #   all_moves = moves
-  #   all_moves.each do |move|
-  #     duped_board = @board.deep_dup
-  #     duped_board.move_piece(@pos, move)
-  #     results << move unless duped_board.in_check?(@color)
-  #   end
-  #   results
-  # end
-
   def valid_moves
     moves.reject do |move|
       duped_board = @board.deep_dup
@@ -64,6 +53,10 @@ class Piece
 
   def get_board(board)
     @board = board
+  end
+
+  def is_null?(position)
+    @board[position] == NullPiece.instance
   end
 end
 
@@ -147,16 +140,7 @@ class King < Piece
   end
 
   def move_diffs
-    [
-      [1,0],
-      [1,1],
-      [0,1],
-      [-1,0],
-      [0,-1],
-      [-1,-1],
-      [1, -1],
-      [-1, 1]
-    ]
+    [[1,0], [1, 1], [0, 1], [-1 ,0], [0, -1], [-1, -1], [1, -1], [-1, 1]]
   end
 
   def deep_dup
@@ -200,28 +184,21 @@ class Pawn < Piece
       d_x, d_y = move
       new_pos = [x + d_x, y + d_y]
       next unless @board.valid_pos?(new_pos)
-
-
-      if move.all? { |m| m.abs == 1 }
-        if @board[new_pos] != NullPiece.instance && @board[new_pos].color != @color
-          results.push(new_pos)
-        end
-      elsif move.include?(2)
-        if @pos == @start_position && @board[new_pos] == NullPiece.instance &&
-          @board[[x + 1, y + d_y]] == NullPiece.instance
-          results.push(new_pos)
-        end
-      elsif move.include?(-2)
-        if @pos == @start_position && @board[new_pos] == NullPiece.instance &&
-          @board[[x + -1, y + d_y]] == NullPiece.instance
-          results.push(new_pos)
-        end
-      elsif @board[new_pos] == NullPiece.instance
+      if move.all? { |m| m.abs == 1 } #diagnols
+        results.push(new_pos) if !is_null?(new_pos) && @board[new_pos].color != @color
+      elsif move.include?(-2) || move.include?(2) #first move of 2 for black
+        results.push(new_pos) if move_2?(new_pos)
+      elsif is_null?(new_pos) #standard move
         results.push(new_pos)
       end
     end
     results
+  end
 
+  def move_2?(new_pos)
+    x, y = new_pos
+    @color == :white ? (x -= 1) : (x += 1)
+    @pos == @start_position && is_null?(new_pos) && is_null?([x, y])
   end
 
   def move_dirs
